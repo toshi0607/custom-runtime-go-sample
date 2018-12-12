@@ -43,3 +43,5 @@ li:
 	  --function-name "go-custome-runtime-sample" \
 	  --payload '{"text":"Hello"}' \
 	  response.txt
+
+uc: up li
