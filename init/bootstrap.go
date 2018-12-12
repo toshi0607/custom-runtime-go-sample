@@ -6,6 +6,14 @@ import (
 	"os/exec"
 )
 
+var(
+	handler string
+)
+
+func init() {
+	handler = os.Getenv("LAMBDA_TASK_ROOT")+"/"+os.Getenv("_HANDLER")
+}
+
 func main() {
 	log.Println("bootstrap実行中")
 	out, err := exec.Command("pwd").Output()
@@ -14,9 +22,8 @@ func main() {
 	}
 	log.Printf("pwd: %s\n", string(out))
 
-	binaryPath := os.Getenv("LAMBDA_TASK_ROOT")+"/"+os.Getenv("_HANDLER")
-	log.Println(binaryPath)
-	if err := exec.Command(binaryPath).Run(); err != nil {
+	log.Println(handler)
+	if err := exec.Command(handler).Run(); err != nil {
 		log.Println(err)
 	}
 }
