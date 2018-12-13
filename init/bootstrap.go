@@ -7,23 +7,23 @@ import (
 )
 
 var(
-	handler string
+	handlerPath string
 )
 
 func init() {
-	handler = os.Getenv("LAMBDA_TASK_ROOT")+"/"+os.Getenv("_HANDLER")
+	handlerPath = os.Getenv("LAMBDA_TASK_ROOT")+"/"+os.Getenv("_HANDLER")
 }
 
 func main() {
-	log.Println("bootstrap実行中")
+	log.Println("bootstrap started")
 	out, err := exec.Command("pwd").Output()
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("failed to exec pwd. error: %v", err)
 	}
 	log.Printf("pwd: %s\n", string(out))
 
-	log.Println(handler)
-	if err := exec.Command(handler).Run(); err != nil {
-		log.Println(err)
+	log.Println(handlerPath)
+	if err := exec.Command(handlerPath).Run(); err != nil {
+		log.Fatalf("failed to exec handler. error: %v", err)
 	}
 }
