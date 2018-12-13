@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Lambda custom runtime implementation by Go
+Resources:
+  CustomRuntimeGoSample:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: go-custome-runtime-sample
+      CodeUri: artifacts
+      Handler: handler
+      Runtime: provided
+      Tracing: Active
