@@ -1,41 +1,25 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"log"
-	"net/http"
 	"os"
+
+	"github.com/toshi0607/go-custom-runtime-sample/runtime"
 )
 
 var (
-	runtimeApiEndpointPrefix string
-	nextEndpoint string
+	runtimeClient runtime.Client
 )
 
 func init() {
-	runtimeApiEndpointPrefix = "http://" + os.Getenv("AWS_LAMBDA_RUNTIME_API") + "/2018-06-01/runtime/invocation/"
-	nextEndpoint = runtimeApiEndpointPrefix + "next"
+	endpoint := "http://" + os.Getenv("AWS_LAMBDA_RUNTIME_API")
+	runtimeClient = runtime.NewClient(endpoint)
 }
 
 func main() {
-	log.Println("handler started")
-	fmt.Println("handler started2")
-
 	for {
-		func() {
-			resp, _ := http.Get(nextEndpoint)
-			defer func() {
-				resp.Body.Close()
-			}()
-
-			rId := resp.Header.Get("Lambda-Runtime-Aws-Request-Id")
-			log.Printf("実行中のリクエストID" + rId)
-			http.Post(respEndpoint(rId), "application/json", bytes.NewBuffer([]byte(rId)))
-		}()
+		_, ec, _ := runtimeClient.NextInvocation()
+		if err := runtimeClient.InvocationResponse(ec.AwsRequestId, []byte(ec.InvokedFunctionArn)); err != nil {
+			runtimeClient.InvocationError(ec.AwsRequestId, runtime.ApiError{})
+		}
 	}
-}
-
-func respEndpoint(requestId string) string {
-	return runtimeApiEndpointPrefix + requestId + "/response"
 }
