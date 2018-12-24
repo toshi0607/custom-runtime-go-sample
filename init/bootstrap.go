@@ -1,29 +1,28 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
-	"os"
-	"os/exec"
+
+	"github.com/toshi0607/go-custom-runtime-sample/runtime"
 )
 
-var(
-	handlerPath string
-)
+type MyEvent struct {
+	Name string `json:"name"`
+}
 
-func init() {
-	handlerPath = os.Getenv("LAMBDA_TASK_ROOT")+"/"+os.Getenv("_HANDLER")
+func MyHandler(ctx runtime.Context, event []byte) ([]byte, error) {
+	log.Printf("request id: %s\n", ctx.AwsRequestId)
+
+	var me MyEvent
+	json.Unmarshal(event, &me)
+
+	str := fmt.Sprintf("Hello %s!", me.Name)
+	log.Println(str)
+	return []byte(str), nil
 }
 
 func main() {
-	log.Println("bootstrap started")
-	out, err := exec.Command("pwd").Output()
-	if err != nil {
-		log.Fatalf("failed to exec pwd. error: %v", err)
-	}
-	log.Printf("pwd: %s\n", string(out))
-
-	log.Println(handlerPath)
-	if err := exec.Command(handlerPath).Run(); err != nil {
-		log.Fatalf("failed to exec handler. error: %v", err)
-	}
+	runtime.Start(MyHandler)
 }

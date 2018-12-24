@@ -18,8 +18,8 @@ const (
 type Client interface {
 	NextInvocation() ([]byte, *EventContext, error)
 	InvocationResponse(awsRequestId string, content []byte) error
-	InvocationError(awsRequestId string, err ApiError) error
-	InitializationError(err ApiError) error
+	InvocationError(awsRequestId string, err error) error
+	InitializationError(err error) error
 }
 
 // https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/runtimes-api.html#runtimes-api-next
@@ -49,11 +49,6 @@ type ClientApplication struct {
 	appVersionName string
 	appVersionCode string
 	appPackageName string
-}
-
-type ApiError struct {
-	errorMessage string
-	errorType    string
 }
 
 type client struct {
@@ -106,7 +101,7 @@ func (c *client) InvocationResponse(awsRequestId string, content []byte) error {
 }
 
 // https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html#runtimes-api-invokeerror
-func (c *client) InvocationError(awsRequestId string, aerr ApiError) error {
+func (c *client) InvocationError(awsRequestId string, aerr error) error {
 	// /runtime/invocation/AwsRequestId/error
 	url := c.endpoint + "/" + RUNTIME_API_VERSION + "/runtime/invocation/" + awsRequestId + "/error"
 	errs, err := json.Marshal(aerr)
@@ -124,7 +119,7 @@ func (c *client) InvocationError(awsRequestId string, aerr ApiError) error {
 }
 
 // https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html#runtimes-api-initerror
-func (c *client) InitializationError(aerr ApiError) error {
+func (c *client) InitializationError(aerr error) error {
 	// /runtime/init/error
 	url := c.endpoint + "/" + RUNTIME_API_VERSION + "/runtime/init/error"
 	errs, err := json.Marshal(aerr)
@@ -162,7 +157,7 @@ func getEventContext(header http.Header) (*EventContext, error) {
 	if runtimeClientContext != "" {
 		var clientContext ClientContext
 		if err := json.Unmarshal([]byte(runtimeClientContext), &clientContext); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal clientContext")
+			return nil, errors.Wrap(err, "failed to unmarshal ClientContext")
 		}
 
 		ev.ClientContext = clientContext
@@ -172,7 +167,7 @@ func getEventContext(header http.Header) (*EventContext, error) {
 	if runtimeCognitoIdentity != "" {
 		var cognitoIdentity CognitoIdentity
 		if err := json.Unmarshal([]byte(runtimeClientContext), &cognitoIdentity); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal clientContext")
+			return nil, errors.Wrap(err, "failed to unmarshal ClientContext")
 		}
 
 		ev.CognitoIdentity = cognitoIdentity

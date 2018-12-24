@@ -2,12 +2,13 @@
 # COMMON
 ################
 
-build: build-function build-bootstrap
+# build: build-function build-bootstrap
+build: build-bootstrap
 .PHONY: build
 
-build-function:
-	GOARCH=amd64 GOOS=linux go build -o artifacts/handler ./handlers
-.PHONY: build-function
+# build-function:
+# 	GOARCH=amd64 GOOS=linux go build -o artifacts/handler ./handlers
+# .PHONY: build-function
 
 build-bootstrap:
 	GOARCH=amd64 GOOS=linux go build -o artifacts/bootstrap ./init
@@ -91,7 +92,7 @@ update-function:
 invoke-function:
 	aws lambda invoke \
 	  --function-name $(FUNCTION_NAME) \
-	  --payload '{"text":"Hello"}' \
+	  --payload '{"name":"toshi"}' \
 	  response.txt
 .PHONY: invoke-function
 
